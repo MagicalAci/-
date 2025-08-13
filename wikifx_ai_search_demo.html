@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WikiFX AI搜索功能演示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .search-section {
+            padding: 40px;
+            background: #f8f9fa;
+        }
+
+        .search-box {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 20px 60px 20px 30px;
+            font-size: 1.2em;
+            border: 3px solid #e9ecef;
+            border-radius: 50px;
+            outline: none;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .search-input:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 20px rgba(52, 152, 219, 0.3);
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-btn:hover {
+            background: #2980b9;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .demo-section {
+            padding: 40px;
+        }
+
+        .demo-example {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .demo-example:hover {
+            border-color: #3498db;
+            box-shadow: 0 10px 30px rgba(52, 152, 219, 0.1);
+        }
+
+        .example-query {
+            background: #e3f2fd;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            color: #1565c0;
+            border-left: 4px solid #2196f3;
+        }
+
+        .intent-analysis {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .intent-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #4caf50;
+        }
+
+        .intent-card h4 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .intent-card p {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .navigation-result {
+            background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .result-header h3 {
+            margin-left: 10px;
+            font-size: 1.3em;
+        }
+
+        .result-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .result-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .result-item h4 {
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+
+        .result-item p {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .recommendations {
+            background: #fff3e0;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #ff9800;
+        }
+
+        .recommendations h4 {
+            color: #e65100;
+            margin-bottom: 15px;
+        }
+
+        .recommendation-list {
+            list-style: none;
+        }
+
+        .recommendation-list li {
+            padding: 8px 0;
+            color: #666;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .recommendation-list li:before {
+            content: "•";
+            color: #ff9800;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        .features-section {
+            background: #f8f9fa;
+            padding: 40px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+            color: #3498db;
+        }
+
+        .feature-card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .footer p {
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .search-input {
+                font-size: 1em;
+                padding: 15px 50px 15px 20px;
+            }
+            
+            .intent-analysis {
+                grid-template-columns: 1fr;
+            }
+            
+            .result-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 WikiFX AI搜索功能演示</h1>
+            <p>智能意图识别 + 导航代理系统</p>
+        </div>
+
+        <div class="search-section">
+            <div class="search-box">
+                <input type="text" class="search-input" placeholder="输入您的搜索查询，例如：我想了解XM交易商的风险评级..." id="searchInput">
+                <button class="search-btn" onclick="simulateSearch()">🔍</button>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2 style="text-align: center; margin-bottom: 30px; color: #2c3e50;">功能演示示例</h2>
+            
+            <!-- 示例1 -->
+            <div class="demo-example">
+                <div class="example-query">
+                    <strong>用户查询：</strong>"我想了解XM交易商的风险评级"
+                </div>
+                
+                <div class="intent-analysis">
+                    <div class="intent-card">
+                        <h4>🎯 意图识别</h4>
+                        <p><strong>主要意图：</strong>风险评估</p>
+                        <p><strong>查询类型：</strong>交易商信息查询</p>
+                    </div>
+                    <div class="intent-card">
+                        <h4>🏢 实体提取</h4>
+                        <p><strong>交易商：</strong>XM</p>
+                        <p><strong>查询内容：</strong>风险评级</p>
+                    </div>
+                    <div class="intent-card">
+                        <h4>🔄 智能路由</h4>
+                        <p><strong>目标模块：</strong>风险评估Agent</p>
+                        <p><strong>数据源：</strong>交易商数据库</p>
+                    </div>
+                </div>
+
+                <div class="navigation-result">
+                    <div class="result-header">
+                        <span style="font-size: 2em;">📊</span>
+                        <h3>智能导航结果</h3>
+                    </div>
+                    <div class="result-content">
+                        <div class="result-item">
+                            <h4>风险评级</h4>
+                            <p>⭐⭐⭐⭐ (4.2/5)</p>
+                        </div>
+                        <div class="result-item">
+                            <h4>市场表现</h4>
+                            <p>良好</p>
+                        </div>
+                        <div class="result-item">
+                            <h4>风险等级</h4>
+                            <p>中等风险</p>
+                        </div>
+                        <div class="result-item">
+                            <h4>监管状态</h4>
+                            <p>受监管</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recommendations">
+                    <h4>💡 智能推荐</h4>
+                    <ul class="recommendation-list">
+                        <li>查看XM交易商的详细风险报告</li>
+                        <li>对比类似交易商的风险评级</li>
+                        <li>了解最新的市场动态和风险变化</li>
+                        <li>查看用户评价和投诉记录</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 示例2 -->
+            <div class="demo-example">
+                <div class="example-query">
+                    <strong>用户查询：</strong>"推荐一些适合初学者的外汇交易商"
+                </div>
+                
+                <div class="intent-analysis">
+                    <div class="intent-card">
+                        <h4>🎯 意图识别</h4>
+                        <p><strong>主要意图：</strong>推荐查询</p>
+                        <p><strong>用户类型：</strong>初学者</p>
+                    </div>
+                    <div class="intent-card">
+                        <h4>🏢 实体提取</h4>
+                        <p><strong>产品类型：</strong>外汇交易</p>
+                        <p><strong>用户需求：</strong>适合初学者</p>
+                    </div>
+                    <div class="intent-card">
+                        <h4>🔄 智能路由</h4>
+                        <p><strong>目标模块：</strong>推荐引擎</p>
+                        <p><strong>算法：</strong>个性化推荐</p>
+                    </div>
+                </div>
+
+                <div class="navigation-result">
+                    <div class="result-header">
+                        <span style="font-size: 2em;">🎯</span>
+                        <h3>个性化推荐结果</h3>
+                    </div>
+                    <div class="result-content">
+                        <div class="result-item">
+                            <h4>FXTM</h4>
+                            <p>适合初学者的教育平台</p>
+                        </div>
+                        <div class="result-item">
+                            <h4>Plus500</h4>
+                            <p>简单易用的交易界面</p>
+                        </div>
+                        <div class="result-item">
+                            <h4>eToro</h4>
+                            <p>社交交易功能</p>
+                        </div>
+                        <div class="result-item">
+                            <h4>IG Group</h4>
+                            <p>完善的教育资源</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recommendations">
+                    <h4>💡 智能推荐</h4>
+                    <ul class="recommendation-list">
+                        <li>查看初学者交易指南</li>
+                        <li>了解各交易商的模拟账户功能</li>
+                        <li>比较不同平台的教育资源</li>
+                        <li>查看用户评价和推荐理由</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="features-section">
+            <h2 style="text-align: center; margin-bottom: 40px; color: #2c3e50;">核心功能特性</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🧠</div>
+                    <h3>智能意图识别</h3>
+                    <p>基于大语言模型，准确理解用户真实意图，支持自然语言查询，提升搜索准确性。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>智能导航代理</h3>
+                    <p>根据用户意图自动路由到最相关的功能模块，提供精准的搜索结果和推荐。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>多维度数据整合</h3>
+                    <p>整合交易商信息、市场数据、用户评价等多源数据，提供全面的搜索结果。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <h3>个性化推荐</h3>
+                    <p>基于用户画像和行为分析，提供个性化的内容推荐和搜索建议。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>实时数据处理</h3>
+                    <p>支持实时市场数据、新闻资讯的智能搜索，确保信息的时效性。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>安全合规</h3>
+                    <p>严格的数据隐私保护和合规要求，确保用户信息安全。</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>WikiFX AI搜索功能 - 让搜索更智能，让信息更精准</p>
+            <p>© 2024 WikiFX. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        function simulateSearch() {
+            const input = document.getElementById('searchInput');
+            const query = input.value.trim();
+            
+            if (query) {
+                // 模拟搜索过程
+                alert(`正在处理查询: "${query}"\n\n功能演示：\n1. 意图识别：分析用户真实需求\n2. 实体提取：识别关键信息\n3. 智能路由：导航到相应模块\n4. 结果聚合：整合多源数据\n5. 个性化推荐：提供相关建议`);
+            } else {
+                alert('请输入搜索查询');
+            }
+        }
+
+        // 回车键搜索
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                simulateSearch();
+            }
+        });
+
+        // 添加一些交互效果
+        document.querySelectorAll('.demo-example').forEach(example => {
+            example.addEventListener('click', function() {
+                this.style.transform = 'scale(1.02)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 200);
+            });
+        });
+    </script>
+</body>
+</html>
