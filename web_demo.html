@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WikiFX AI智能搜索 - 第一期Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header .subtitle {
+            color: #7f8c8d;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        .search-section {
+            margin-bottom: 40px;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 20px 60px 20px 20px;
+            font-size: 1.1em;
+            border: 2px solid #e0e0e0;
+            border-radius: 50px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 20px rgba(52, 152, 219, 0.2);
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 5px;
+            top: 5px;
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .search-btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .quick-queries {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .quick-query {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        .quick-query:hover {
+            background: #3498db;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .demo-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #3498db;
+        }
+
+        .demo-card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .intent-result {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+
+        .intent-badge {
+            display: inline-block;
+            background: #27ae60;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            margin-right: 10px;
+        }
+
+        .confidence-bar {
+            width: 100%;
+            height: 8px;
+            background: #ecf0f1;
+            border-radius: 4px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #e74c3c, #f39c12, #27ae60);
+            border-radius: 4px;
+            transition: width 0.8s ease;
+        }
+
+        .entities-list {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+
+        .entity-tag {
+            background: #3498db;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+        }
+
+        .navigation-path {
+            background: #ecf0f1;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+
+        .suggestions {
+            list-style: none;
+            padding: 0;
+        }
+
+        .suggestions li {
+            background: #f8f9fa;
+            margin: 5px 0;
+            padding: 8px 12px;
+            border-radius: 5px;
+            border-left: 3px solid #3498db;
+        }
+
+        .results-section {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .result-item {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            transition: all 0.3s ease;
+        }
+
+        .result-item:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .result-title {
+            color: #2c3e50;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .result-content {
+            color: #7f8c8d;
+            line-height: 1.6;
+        }
+
+        .result-score {
+            float: right;
+            background: #27ae60;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8em;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .architecture-section {
+            margin-top: 50px;
+            padding: 30px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+        }
+
+        .architecture-title {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 1.8em;
+            margin-bottom: 30px;
+        }
+
+        .workflow-steps {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .workflow-step {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            flex: 1;
+            min-width: 150px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .workflow-step::after {
+            content: '→';
+            position: absolute;
+            right: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5em;
+            color: #3498db;
+        }
+
+        .workflow-step:last-child::after {
+            display: none;
+        }
+
+        .step-icon {
+            width: 50px;
+            height: 50px;
+            background: #3498db;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-size: 1.2em;
+        }
+
+        @media (max-width: 768px) {
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .workflow-steps {
+                flex-direction: column;
+            }
+            
+            .workflow-step::after {
+                content: '↓';
+                right: 50%;
+                top: calc(100% + 10px);
+                transform: translateX(50%);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>WikiFX AI智能搜索</h1>
+            <p class="subtitle">基于意图识别和导航代理的智能搜索系统</p>
+            <span class="badge">第一期 Demo</span>
+        </div>
+
+        <div class="search-section">
+            <div class="search-box">
+                <input type="text" class="search-input" placeholder="输入您的查询，体验AI智能搜索..." id="searchInput">
+                <button class="search-btn" onclick="performSearch()">🔍 搜索</button>
+            </div>
+            
+            <div class="quick-queries">
+                <span class="quick-query" onclick="setQuery('XM交易商怎么样，安全吗？')">XM交易商怎么样，安全吗？</span>
+                <span class="quick-query" onclick="setQuery('我想了解外汇交易的基础知识')">我想了解外汇交易的基础知识</span>
+                <span class="quick-query" onclick="setQuery('帮我对比一下XM和IG Markets')">帮我对比一下XM和IG Markets</span>
+                <span class="quick-query" onclick="setQuery('FCA监管的交易商有哪些？')">FCA监管的交易商有哪些？</span>
+                <span class="quick-query" onclick="setQuery('今天的EUR/USD走势如何？')">今天的EUR/USD走势如何？</span>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>AI正在分析您的查询意图...</p>
+        </div>
+
+        <div class="demo-grid" id="resultsGrid" style="display: none;">
+            <div class="demo-card">
+                <h3>🎯 意图识别结果</h3>
+                <div class="intent-result">
+                    <div>
+                        <span class="intent-badge" id="intentBadge">风险评估</span>
+                        <span id="queryType">交易商查询</span>
+                    </div>
+                    <div style="margin: 10px 0;">
+                        置信度: <span id="confidence">92%</span>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" id="confidenceFill" style="width: 92%;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        识别实体:
+                        <div class="entities-list" id="entitiesList">
+                            <span class="entity-tag">XM (交易商)</span>
+                            <span class="entity-tag">安全性 (关注点)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="demo-card">
+                <h3>🧭 智能导航路径</h3>
+                <div class="navigation-path" id="navigationPath">
+                    首页 > 交易商 > 风险评估 > 综合评级
+                </div>
+                <div style="margin-top: 15px;">
+                    <strong>建议操作:</strong>
+                    <ul class="suggestions" id="suggestions">
+                        <li>查看用户评价和评分</li>
+                        <li>分析风险指标</li>
+                        <li>对比同类交易商</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-section" id="resultsSection">
+            <h3>📊 搜索结果</h3>
+            <div id="searchResults">
+                <!-- 搜索结果将在这里显示 -->
+            </div>
+        </div>
+
+        <div class="architecture-section">
+            <h2 class="architecture-title">🏗️ AI搜索系统架构</h2>
+            <div class="workflow-steps">
+                <div class="workflow-step">
+                    <div class="step-icon">📝</div>
+                    <h4>用户输入</h4>
+                    <p>自然语言查询</p>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-icon">🧠</div>
+                    <h4>意图识别</h4>
+                    <p>AI理解用户意图</p>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-icon">🏷️</div>
+                    <h4>实体抽取</h4>
+                    <p>提取关键信息</p>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-icon">🧭</div>
+                    <h4>智能导航</h4>
+                    <p>选择搜索策略</p>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-icon">🔍</div>
+                    <h4>执行搜索</h4>
+                    <p>检索相关内容</p>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-icon">📊</div>
+                    <h4>结果展示</h4>
+                    <p>智能排序展示</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟的意图识别数据
+        const intentDatabase = {
+            "XM交易商怎么样，安全吗？": {
+                intent: "风险评估",
+                confidence: 0.92,
+                entities: [
+                    { name: "XM", type: "broker_name" },
+                    { name: "安全", type: "concern" }
+                ],
+                queryType: "交易商查询",
+                navigationPath: ["首页", "交易商", "风险评估", "综合评级"],
+                suggestions: [
+                    "查看用户评价和评分",
+                    "分析风险指标",
+                    "对比同类交易商"
+                ],
+                results: [
+                    {
+                        title: "XM交易商风险评估报告",
+                        content: "XM集团是一家受到多重监管的国际外汇经纪商，拥有FCA、CySEC、ASIC等权威机构监管牌照。用户满意度评分4.2/5分，属于低风险AAA级别交易商。",
+                        score: 0.95,
+                        type: "风险评估"
+                    }
+                ]
+            },
+            "我想了解外汇交易的基础知识": {
+                intent: "基础知识",
+                confidence: 0.88,
+                entities: [
+                    { name: "外汇交易", type: "topic" },
+                    { name: "基础知识", type: "content_type" }
+                ],
+                queryType: "教育内容",
+                navigationPath: ["首页", "教育中心", "基础知识", "入门教程"],
+                suggestions: [
+                    "推荐入门教程",
+                    "提供基础知识",
+                    "安排学习路径"
+                ],
+                results: [
+                    {
+                        title: "外汇交易入门完整指南",
+                        content: "从零开始学习外汇交易，包括市场基础、交易术语、风险管理等核心概念。适合初学者的系统性教程。",
+                        score: 0.91,
+                        type: "教育内容"
+                    }
+                ]
+            },
+            "帮我对比一下XM和IG Markets": {
+                intent: "对比选择",
+                confidence: 0.94,
+                entities: [
+                    { name: "XM", type: "broker_name" },
+                    { name: "IG Markets", type: "broker_name" }
+                ],
+                queryType: "交易商查询",
+                navigationPath: ["首页", "交易商", "对比分析", "详细对比"],
+                suggestions: [
+                    "生成对比表格",
+                    "分析优劣势",
+                    "推荐最佳选择"
+                ],
+                results: [
+                    {
+                        title: "XM vs IG Markets 全面对比",
+                        content: "监管：XM(FCA+CySEC+ASIC) vs IG(FCA+多国监管) | 点差：XM(1.6点起) vs IG(0.6点起) | 平台：两者都支持MT4/MT5",
+                        score: 0.96,
+                        type: "对比分析"
+                    }
+                ]
+            },
+            "FCA监管的交易商有哪些？": {
+                intent: "监管查询",
+                confidence: 0.90,
+                entities: [
+                    { name: "FCA", type: "regulation_body" }
+                ],
+                queryType: "交易商查询",
+                navigationPath: ["首页", "交易商", "监管信息", "FCA监管列表"],
+                suggestions: [
+                    "查询监管牌照信息",
+                    "检查监管机构认证",
+                    "查看合规状态历史"
+                ],
+                results: [
+                    {
+                        title: "FCA监管的主要外汇交易商",
+                        content: "包括IG Markets、XM、FXCM、OANDA等知名交易商都受到英国金融行为监管局(FCA)监管，监管编号可在FCA官网查询验证。",
+                        score: 0.93,
+                        type: "监管信息"
+                    }
+                ]
+            },
+            "今天的EUR/USD走势如何？": {
+                intent: "市场分析",
+                confidence: 0.85,
+                entities: [
+                    { name: "EUR/USD", type: "currency_pair" },
+                    { name: "今天", type: "time" }
+                ],
+                queryType: "市场资讯",
+                navigationPath: ["首页", "市场分析", "货币对", "EUR/USD"],
+                suggestions: [
+                    "查看实时价格",
+                    "分析技术指标",
+                    "获取专家观点"
+                ],
+                results: [
+                    {
+                        title: "EUR/USD今日技术分析",
+                        content: "欧美货币对今日在1.0850附近震荡，受欧央行政策影响，短期呈区间整理态势。技术面支撑1.0820，阻力1.0880。",
+                        score: 0.87,
+                        type: "市场分析"
+                    }
+                ]
+            }
+        };
+
+        function setQuery(query) {
+            document.getElementById('searchInput').value = query;
+            performSearch();
+        }
+
+        function performSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) return;
+
+            // 显示加载状态
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('resultsGrid').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'none';
+
+            // 模拟AI处理延迟
+            setTimeout(() => {
+                const result = intentDatabase[query] || getDefaultResult(query);
+                displayResults(result);
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('resultsGrid').style.display = 'grid';
+                document.getElementById('resultsSection').style.display = 'block';
+            }, 1500);
+        }
+
+        function getDefaultResult(query) {
+            return {
+                intent: "未知意图",
+                confidence: 0.3,
+                entities: [],
+                queryType: "综合查询",
+                navigationPath: ["首页", "搜索结果"],
+                suggestions: [
+                    "提供相关信息",
+                    "推荐相关内容",
+                    "联系专业顾问"
+                ],
+                results: [
+                    {
+                        title: "相关搜索结果",
+                        content: "未找到精确匹配的内容，建议您尝试更具体的关键词或使用快速查询示例。",
+                        score: 0.5,
+                        type: "通用结果"
+                    }
+                ]
+            };
+        }
+
+        function displayResults(result) {
+            // 更新意图识别结果
+            document.getElementById('intentBadge').textContent = result.intent;
+            document.getElementById('queryType').textContent = result.queryType;
+            document.getElementById('confidence').textContent = Math.round(result.confidence * 100) + '%';
+            document.getElementById('confidenceFill').style.width = (result.confidence * 100) + '%';
+
+            // 更新实体列表
+            const entitiesList = document.getElementById('entitiesList');
+            entitiesList.innerHTML = '';
+            result.entities.forEach(entity => {
+                const tag = document.createElement('span');
+                tag.className = 'entity-tag';
+                tag.textContent = `${entity.name} (${entity.type})`;
+                entitiesList.appendChild(tag);
+            });
+
+            // 更新导航路径
+            document.getElementById('navigationPath').textContent = result.navigationPath.join(' > ');
+
+            // 更新建议操作
+            const suggestionsList = document.getElementById('suggestions');
+            suggestionsList.innerHTML = '';
+            result.suggestions.forEach(suggestion => {
+                const li = document.createElement('li');
+                li.textContent = suggestion;
+                suggestionsList.appendChild(li);
+            });
+
+            // 更新搜索结果
+            const searchResults = document.getElementById('searchResults');
+            searchResults.innerHTML = '';
+            result.results.forEach(item => {
+                const resultDiv = document.createElement('div');
+                resultDiv.className = 'result-item';
+                resultDiv.innerHTML = `
+                    <div class="result-title">
+                        ${item.title}
+                        <span class="result-score">${Math.round(item.score * 100)}%</span>
+                    </div>
+                    <div class="result-content">${item.content}</div>
+                `;
+                searchResults.appendChild(resultDiv);
+            });
+        }
+
+        // 监听回车键
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('WikiFX AI搜索 Demo 已加载');
+        });
+    </script>
+</body>
+</html>
