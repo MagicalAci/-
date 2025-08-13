@@ -6,3 +6,5 @@
  * Running on http://172.30.0.2:8000
 [33mPress CTRL+C to quit[0m
 127.0.0.1 - - [13/Aug/2025 05:21:59] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2025 05:23:11] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [13/Aug/2025 05:23:11] "POST /ai-search/navigate HTTP/1.1" 200 -
