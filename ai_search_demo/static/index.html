@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>WikiFX AI 搜索 Demo</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; margin: 24px; }
+    .container { max-width: 920px; margin: 0 auto; }
+    .search { display: flex; gap: 8px; }
+    input[type=text] { flex: 1; padding: 12px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
+    button { padding: 12px 16px; background: #6c5ce7; color: #fff; border: 0; border-radius: 8px; cursor: pointer; }
+    .chips { margin-top: 8px; color: #666; font-size: 13px; }
+    .grid { display: grid; grid-template-columns: 260px 1fr; gap: 16px; margin-top: 20px; }
+    .side { border-right: 1px dashed #eee; padding-right: 12px; }
+    .card { border: 1px solid #eee; border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+    .title { font-weight: 600; margin-bottom: 8px; }
+    .muted { color: #888; font-size: 12px; }
+    .source a { color: #0984e3; text-decoration: none; }
+    ul { margin: 6px 0 0 18px; }
+    li { margin: 4px 0; }
+    .route { font-size: 12px; color: #555; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>WikiFX AI 搜索 Demo</h2>
+    <div class="search">
+      <input id="q" type="text" placeholder="例如：xm 出金困难 / xm 监管牌照 / xm 官网" value="xm 出金困难"/>
+      <button onclick="go()">搜索</button>
+    </div>
+    <div id="chips" class="chips"></div>
+
+    <div class="grid">
+      <div class="side">
+        <div class="card">
+          <div class="title">推荐垂直</div>
+          <div id="route" class="route">-</div>
+        </div>
+      </div>
+      <div>
+        <div id="cards"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function go() {
+      const q = document.getElementById('q').value.trim();
+      const res = await fetch('/ai-search/navigate', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: q, locale: 'zh-CN', scene: 1 })
+      });
+      const data = await res.json();
+      render(data);
+    }
+
+    function render(data) {
+      const chips = document.getElementById('chips');
+      chips.innerHTML = `意图：<b>${data.intent.task}</b>；实体：<b>${JSON.stringify(data.intent.entities || {})}</b>`;
+
+      const route = document.getElementById('route');
+      route.innerHTML = data.route.map(r => `${r.vertical} (${r.weight})`).join(' / ');
+
+      const cards = document.getElementById('cards');
+      cards.innerHTML = '';
+      for (const c of data.cards) {
+        const div = document.createElement('div');
+        div.className = 'card';
+        if (c.type === 'broker_summary') {
+          div.innerHTML = `<div class='title'>${c.title}</div>
+            <div class='muted'>评分：${c.facts.score ?? '-'} | 风险：${c.facts.risk ?? '-'}</div>
+            <div>监管：${(c.facts.regulation || []).join(' / ')}</div>
+            <div class='source'>来源：${(c.sources||[]).map(s=>`<a href='${s.url}' target='_blank'>${s.title}</a>`).join('、')}</div>`;
+        } else if (c.type === 'action_suggestion') {
+          div.innerHTML = `<div class='title'>${c.title || '行动建议'}</div>
+            <ul>${(c.steps||[]).map(s=>`<li>${s}</li>`).join('')}</ul>
+            <div>${(c.links||[]).map(l=>`<a href='${l.url}' target='_blank'>${l.text}</a>`).join(' | ')}</div>`;
+        } else if (c.type === 'risk_exposure') {
+          div.innerHTML = `<div class='title'>${c.title}</div>
+            <ul>${(c.items||[]).map(i=>`<li><a href='${i.url}' target='_blank'>${i.title}</a><div class='muted'>${i.snippet||''}</div></li>`).join('')}</ul>`;
+        } else if (c.type === 'empty') {
+          div.innerHTML = `<div class='title'>${c.title}</div>
+            <ul>${(c.steps||[]).map(s=>`<li>${s}</li>`).join('')}</ul>`
+        }
+        cards.appendChild(div);
+      }
+    }
+
+    go();
+  </script>
+</body>
+</html>
