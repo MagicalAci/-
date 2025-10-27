@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WikiFX AI 搜索 Demo（P0：意图识别 + 导航代理）</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <meta name="description" content="WikiFX AI 搜索 Demo：第一期（P0）意图识别与导航代理，可视化示例" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <img src="./assets/logo.svg" alt="Logo" onerror="this.style.display='none'" />
+      <h1>WikiFX AI 搜索 Demo</h1>
+    </div>
+    <div class="subtitle">第一期（P0）：意图识别 + 导航代理</div>
+  </header>
+
+  <main class="container">
+    <section class="search-panel">
+      <div class="input-row">
+        <input id="queryInput" type="text" placeholder="试试：xm 出金 / ic markets 监管 / 比较 xm 和 ic markets / exness 官方号" />
+        <button id="searchBtn" class="primary">AI 搜索</button>
+      </div>
+      <div class="quick-hints">
+        <span class="hint">现有类别：</span>
+        <div class="chips" id="chipsRow">
+          <button class="chip" data-type="交易商">交易商</button>
+          <button class="chip" data-type="自营交易商">自营交易商</button>
+          <button class="chip" data-type="企业">企业</button>
+          <button class="chip" data-type="官方号">官方号</button>
+          <button class="chip" data-type="内容">内容</button>
+          <button class="chip" data-type="用户">用户</button>
+          <button class="chip" data-type="区块">区块</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="resultSection" class="result hidden">
+      <div class="result-head">
+        <div>
+          <div class="title">AI 导航建议</div>
+          <div id="reasoning" class="reasoning"></div>
+        </div>
+        <div class="confidence" id="confidence">置信度：--</div>
+      </div>
+
+      <div id="actionsRow" class="actions-row"></div>
+
+      <div class="cards">
+        <div class="card">
+          <div class="card-title">建议跳转</div>
+          <div id="targetCard" class="card-body"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">相关实体</div>
+          <div id="entitiesCard" class="card-body"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">相似查询</div>
+          <div id="suggestionsCard" class="card-body"></div>
+        </div>
+      </div>
+
+      <div class="footnote">
+        本 Demo 本地规则识别，仅用于演示。线上可替换为模型推断与后端编排。
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <a href="./docs/AI-Search-Plan.md" target="_blank">产品方案文档</a>
+    <span>·</span>
+    <a href="https://www.wikifx.com/zh-cn/search.html?keyword=xm&SearchPosition=1&scene=1" target="_blank">WikiFX 当前搜索示例</a>
+  </footer>
+
+  <script src="./app.js"></script>
+</body>
+</html>
