@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WikiFX AI搜索功能演示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .search-section {
+            padding: 40px;
+            background: #f8f9fa;
+        }
+
+        .search-container {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 20px 60px 20px 30px;
+            font-size: 18px;
+            border: 3px solid #e9ecef;
+            border-radius: 50px;
+            outline: none;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .search-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .ai-analysis {
+            margin-top: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .intent-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .intent-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .intent-details {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .intent-item {
+            background: rgba(255,255,255,0.2);
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .navigation-suggestions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .nav-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .nav-card:hover {
+            border-color: #667eea;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+        }
+
+        .nav-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .nav-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+
+        .nav-desc {
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .results-section {
+            padding: 40px;
+            display: none;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .results-title {
+            font-size: 1.5em;
+            color: #2c3e50;
+        }
+
+        .filter-tags {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tag {
+            background: #e9ecef;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #495057;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-tag:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .result-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .result-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .result-info h3 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .result-info p {
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .result-details {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .detail-item {
+            background: #f8f9fa;
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            color: #495057;
+        }
+
+        .result-description {
+            color: #6c757d;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .demo-examples {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+
+        .examples-title {
+            font-size: 1.2em;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .example-queries {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .example-query {
+            background: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #667eea;
+            cursor: pointer;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .example-query:hover {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 WikiFX AI搜索</h1>
+            <p>智能理解您的搜索意图，提供精准的金融信息</p>
+        </div>
+
+        <div class="search-section">
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="请输入您的搜索需求，例如：我想找一个受FCA监管的外汇交易商..." id="searchInput">
+                <button class="search-btn" onclick="performSearch()">搜索</button>
+            </div>
+
+            <div class="demo-examples">
+                <div class="examples-title">💡 搜索示例：</div>
+                <div class="example-queries">
+                    <div class="example-query" onclick="setExample('我想找一个受FCA监管的外汇交易商')">受FCA监管的外汇交易商</div>
+                    <div class="example-query" onclick="setExample('哪个交易商的手续费最低？')">手续费最低的交易商</div>
+                    <div class="example-query" onclick="setExample('帮我比较一下XM和FXTM')">比较XM和FXTM</div>
+                    <div class="example-query" onclick="setExample('推荐一个适合新手的交易平台')">新手推荐平台</div>
+                </div>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>AI正在分析您的搜索意图...</p>
+            </div>
+
+            <div class="ai-analysis" id="aiAnalysis">
+                <div class="intent-card">
+                    <div class="intent-title">🎯 识别到的搜索意图</div>
+                    <div class="intent-details">
+                        <div class="intent-item">主要意图：<span id="mainIntent">交易商查询</span></div>
+                        <div class="intent-item">实体识别：<span id="entities">FCA, 外汇交易商</span></div>
+                        <div class="intent-item">置信度：<span id="confidence">95%</span></div>
+                    </div>
+                </div>
+
+                <div class="navigation-suggestions">
+                    <div class="nav-card" onclick="navigateTo('brokers')">
+                        <div class="nav-icon">🏢</div>
+                        <div class="nav-title">交易商搜索</div>
+                        <div class="nav-desc">查找符合条件的交易商</div>
+                    </div>
+                    <div class="nav-card" onclick="navigateTo('comparison')">
+                        <div class="nav-icon">⚖️</div>
+                        <div class="nav-title">对比分析</div>
+                        <div class="nav-desc">多维度对比交易商</div>
+                    </div>
+                    <div class="nav-card" onclick="navigateTo('reviews')">
+                        <div class="nav-icon">⭐</div>
+                        <div class="nav-title">用户评价</div>
+                        <div class="nav-desc">查看真实用户反馈</div>
+                    </div>
+                    <div class="nav-card" onclick="navigateTo('regulations')">
+                        <div class="nav-icon">📋</div>
+                        <div class="nav-title">监管信息</div>
+                        <div class="nav-desc">了解监管合规情况</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-section" id="resultsSection">
+            <div class="results-header">
+                <div class="results-title">搜索结果</div>
+                <div class="filter-tags">
+                    <div class="filter-tag">FCA监管</div>
+                    <div class="filter-tag">外汇交易</div>
+                    <div class="filter-tag">低手续费</div>
+                    <div class="filter-tag">新手友好</div>
+                </div>
+            </div>
+
+            <div class="results-grid">
+                <div class="result-card">
+                    <div class="result-header">
+                        <div class="result-avatar">XM</div>
+                        <div class="result-info">
+                            <h3>XM Group</h3>
+                            <p>全球知名外汇交易商</p>
+                        </div>
+                    </div>
+                    <div class="result-details">
+                        <div class="detail-item">FCA监管</div>
+                        <div class="detail-item">低点差</div>
+                        <div class="detail-item">新手友好</div>
+                    </div>
+                    <div class="result-description">
+                        XM Group是一家受FCA监管的知名外汇交易商，提供低点差交易服务，特别适合新手投资者。
+                    </div>
+                </div>
+
+                <div class="result-card">
+                    <div class="result-header">
+                        <div class="result-avatar">FX</div>
+                        <div class="result-info">
+                            <h3>FXTM</h3>
+                            <p>专业外汇交易平台</p>
+                        </div>
+                    </div>
+                    <div class="result-details">
+                        <div class="detail-item">FCA监管</div>
+                        <div class="detail-item">教育资源丰富</div>
+                        <div class="detail-item">多种账户类型</div>
+                    </div>
+                    <div class="result-description">
+                        FXTM提供丰富的教育资源和多种账户类型，是学习外汇交易的理想平台。
+                    </div>
+                </div>
+
+                <div class="result-card">
+                    <div class="result-header">
+                        <div class="result-avatar">IC</div>
+                        <div class="result-info">
+                            <h3>IC Markets</h3>
+                            <p>ECN交易专家</p>
+                        </div>
+                    </div>
+                    <div class="result-details">
+                        <div class="detail-item">ASIC监管</div>
+                        <div class="detail-item">ECN模式</div>
+                        <div class="detail-item">超低点差</div>
+                    </div>
+                    <div class="result-description">
+                        IC Markets采用ECN交易模式，提供超低点差，适合高频交易者。
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function setExample(query) {
+            document.getElementById('searchInput').value = query;
+        }
+
+        function performSearch() {
+            const query = document.getElementById('searchInput').value;
+            if (!query.trim()) return;
+
+            // 显示加载状态
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('aiAnalysis').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'none';
+
+            // 模拟AI分析过程
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                
+                // 根据查询内容设置不同的意图
+                let intent, entities, confidence;
+                if (query.includes('FCA') || query.includes('监管')) {
+                    intent = '监管查询';
+                    entities = 'FCA, 外汇交易商';
+                    confidence = '95%';
+                } else if (query.includes('比较') || query.includes('对比')) {
+                    intent = '比较分析';
+                    entities = 'XM, FXTM';
+                    confidence = '92%';
+                } else if (query.includes('推荐') || query.includes('建议')) {
+                    intent = '推荐请求';
+                    entities = '新手, 交易平台';
+                    confidence = '88%';
+                } else if (query.includes('手续费') || query.includes('费用')) {
+                    intent = '费用查询';
+                    entities = '手续费, 交易成本';
+                    confidence = '90%';
+                } else {
+                    intent = '信息查询';
+                    entities = '交易商信息';
+                    confidence = '85%';
+                }
+
+                document.getElementById('mainIntent').textContent = intent;
+                document.getElementById('entities').textContent = entities;
+                document.getElementById('confidence').textContent = confidence;
+
+                document.getElementById('aiAnalysis').style.display = 'block';
+                document.getElementById('aiAnalysis').classList.add('fade-in');
+            }, 2000);
+        }
+
+        function navigateTo(type) {
+            // 显示搜索结果
+            document.getElementById('resultsSection').style.display = 'block';
+            document.getElementById('resultsSection').classList.add('fade-in');
+            
+            // 滚动到结果区域
+            document.getElementById('resultsSection').scrollIntoView({ 
+                behavior: 'smooth' 
+            });
+        }
+
+        // 回车键搜索
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        // 页面加载时的动画效果
+        window.addEventListener('load', function() {
+            document.querySelector('.container').classList.add('fade-in');
+        });
+    </script>
+</body>
+</html>
